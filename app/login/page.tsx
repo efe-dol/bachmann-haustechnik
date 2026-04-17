@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 
 export default function LoginPage() {
   const supabase = useMemo(() => createClient(), []);
+  const isSupabaseConfigured = Boolean(supabase);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +15,12 @@ export default function LoginPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!supabase) {
+      setError("Supabase ist nicht konfiguriert. Bitte Deployment-Umgebungsvariablen setzen.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
     setMessage("");
@@ -91,12 +98,18 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !isSupabaseConfigured}
             className="w-full rounded-xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? "Anmelden..." : "Anmelden"}
           </button>
         </form>
+
+        {!isSupabaseConfigured && (
+          <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            Supabase-Keys fehlen. Setze NEXT_PUBLIC_SUPABASE_URL und NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in den Deployment-Variablen.
+          </p>
+        )}
 
         {error && (
           <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
