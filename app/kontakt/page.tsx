@@ -1,0 +1,284 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { FormEvent, useEffect, useState } from "react";
+
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xrerqygb";
+
+const topMenus = [
+  {
+    title: "Startseite",
+    href: "/",
+  },
+  {
+    title: "Leistungen",
+    links: [
+      { label: "Bader", href: "/leistungen/baeder" },
+      { label: "Heizungen", href: "/leistungen/heizungen" },
+      { label: "Sanitar", href: "/leistungen/sanitaer" },
+      { label: "Wassertechnik", href: "/leistungen/wassertechnik" },
+    ],
+  },
+  {
+    title: "Referenzen",
+    links: [
+      { label: "Badmodernisierung", href: "/referenzen/badumbau" },
+      { label: "Heizungsprojekte", href: "/referenzen/heizungsprojekte" },
+      { label: "Wassertechnik", href: "/referenzen/wassertechnik" },
+    ],
+  },
+  {
+    title: "Unternehmen",
+    links: [
+      { label: "Uber uns", href: "/unternehmen/ueber-uns" },
+      { label: "Partner", href: "/unternehmen/partner" },
+      { label: "Kontakt", href: "/kontakt" },
+    ],
+  },
+];
+
+type SubmitState = "idle" | "sending" | "success" | "error";
+
+export default function KontaktPage() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 16);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitState("sending");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    const payload = {
+      name: String(formData.get("name") ?? ""),
+      email: String(formData.get("email") ?? ""),
+      phone: String(formData.get("phone") ?? ""),
+      message: String(formData.get("message") ?? ""),
+    };
+
+    try {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Formspree request failed");
+      }
+
+      form.reset();
+      setSubmitState("success");
+    } catch {
+      setSubmitState("error");
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 px-6 pt-0 pb-12 text-zinc-900 md:px-10">
+      <header
+        className={`fixed top-0 right-0 left-0 z-40 transition-all duration-300 ${
+          isScrolled
+            ? "border-b border-white/70 bg-white/70 backdrop-blur-lg"
+            : "border-b border-transparent bg-transparent backdrop-blur-0"
+        }`}
+      >
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-4 px-6 py-3 md:px-10 lg:grid-cols-[1fr_auto_1fr]">
+          <Link href="/" className="inline-flex items-center">
+            <Image
+              src="/bachmann-logo.png"
+              alt="Bachmann Haustechnik"
+              width={200}
+              height={76}
+              priority
+              className="h-auto w-[120px] md:w-[160px]"
+            />
+          </Link>
+
+          <nav className="hidden lg:flex">
+            <div className="inline-flex overflow-visible rounded-lg border border-zinc-900/20 bg-transparent shadow-[0_6px_20px_rgba(0,0,0,0.10)] backdrop-blur-sm">
+              {topMenus.map((menu, index) => (
+                <div key={menu.title} className="group relative">
+                  {menu.href ? (
+                    <Link
+                      href={menu.href}
+                      className="inline-flex px-6 py-2.5 text-xs font-medium tracking-wide text-zinc-900 transition hover:bg-zinc-900/5"
+                    >
+                      {menu.title}
+                    </Link>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="inline-flex cursor-pointer px-6 py-2.5 text-xs font-medium tracking-wide text-zinc-900 transition hover:bg-zinc-900/5"
+                      >
+                        {menu.title} <span className="ml-1 text-[10px] text-zinc-600">v</span>
+                      </button>
+                      <div className="pointer-events-none absolute left-1/2 top-[calc(100%-1px)] z-50 w-56 -translate-x-1/2 translate-y-1 rounded-lg border border-zinc-900/15 bg-white/92 p-2 opacity-0 shadow-2xl shadow-zinc-900/10 backdrop-blur-md transition-all duration-150 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+                        {menu.links.map((item) => (
+                          <Link
+                            key={item.label}
+                            href={item.href}
+                            className={`block rounded-md px-4 py-2.5 text-sm transition hover:bg-zinc-900/5 ${
+                              item.href === "/kontakt"
+                                ? "bg-zinc-900/10 text-zinc-900"
+                                : "text-zinc-900"
+                            }`}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {index < topMenus.length - 1 && (
+                    <span className="pointer-events-none absolute top-2 right-0 h-5 w-px bg-zinc-900/20" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </nav>
+
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              aria-label="Suche"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/70 bg-white/75 text-zinc-700 transition hover:border-blue-200 hover:text-blue-600"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              aria-label="E-Mail"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/70 bg-white/75 text-zinc-700 transition hover:border-blue-200 hover:text-blue-600"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="m4 7 8 6 8-6" />
+              </svg>
+            </button>
+            <Link
+              href="/login"
+              aria-label="Login"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/70 bg-white/75 text-zinc-700 transition hover:border-blue-200 hover:text-blue-600"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10 17 15 12 10 7" />
+                <path d="M15 12H3" />
+                <path d="M21 4v16" />
+              </svg>
+            </Link>
+            <Link
+              href="/kontakt"
+              className="inline-flex h-9 items-center rounded-lg bg-zinc-900 px-4 text-xs font-semibold text-white transition hover:bg-zinc-700"
+            >
+              Angebot anfragen
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto w-full max-w-5xl pt-40">
+        <section className="anim-soft-enter anim-delay-1 rounded-3xl border border-white/70 bg-white/85 p-8 shadow-2xl backdrop-blur-md md:p-10">
+          <p className="leistungen-badge-animated text-xs font-semibold tracking-[0.2em] uppercase">
+            Kontakt
+          </p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <article className="anim-soft-enter anim-delay-2 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <p className="text-xs font-semibold tracking-[0.15em] text-zinc-500 uppercase">E-Mail</p>
+              <p className="mt-2 text-2xl font-black tracking-tight text-zinc-900 md:text-3xl">
+                info@bachmann-haustechnik.de
+              </p>
+            </article>
+            <article className="anim-soft-enter anim-delay-3 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <p className="text-xs font-semibold tracking-[0.15em] text-zinc-500 uppercase">Telefon</p>
+              <p className="mt-2 text-2xl font-black tracking-tight text-zinc-900 md:text-3xl">
+                0881 / 927 07 810
+              </p>
+            </article>
+          </div>
+
+          <h2 className="anim-text-enter anim-delay-4 mt-10 text-4xl font-black tracking-tight text-zinc-900 md:text-5xl">
+            Kontaktformular
+          </h2>
+
+          <form onSubmit={handleSubmit} className="anim-soft-enter anim-delay-5 mt-6 grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="grid gap-2 text-sm font-semibold text-zinc-800">
+                Name
+                <input
+                  required
+                  name="name"
+                  type="text"
+                  className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-400"
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-semibold text-zinc-800">
+                E-Mail
+                <input
+                  required
+                  name="email"
+                  type="email"
+                  className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-400"
+                />
+              </label>
+            </div>
+
+            <label className="grid gap-2 text-sm font-semibold text-zinc-800">
+              Telefonnummer
+              <input
+                name="phone"
+                type="tel"
+                className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-400"
+              />
+            </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-zinc-800">
+              Nachricht
+              <textarea
+                required
+                name="message"
+                rows={6}
+                className="resize-y rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-400"
+              />
+            </label>
+
+            <button
+              type="submit"
+              disabled={submitState === "sending"}
+              className="inline-flex w-fit items-center rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitState === "sending" ? "Wird gesendet..." : "Nachricht senden"}
+            </button>
+
+            {submitState === "success" && (
+              <p className="text-sm font-medium text-emerald-700">
+                Danke! Deine Nachricht wurde erfolgreich ubermittelt.
+              </p>
+            )}
+            {submitState === "error" && (
+              <p className="text-sm font-medium text-rose-700">
+                Leider gab es ein Problem beim Senden. Bitte versuche es erneut.
+              </p>
+            )}
+          </form>
+        </section>
+      </div>
+    </main>
+  );
+}
