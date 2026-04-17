@@ -172,7 +172,7 @@ export default function HeizungenPage() {
 
           <details className="relative lg:hidden">
             <summary className="list-none cursor-pointer rounded-lg border border-white/70 bg-white/75 px-3 py-2 text-xs font-semibold tracking-wide text-zinc-800 transition hover:border-blue-200 hover:text-blue-600 [&::-webkit-details-marker]:hidden">
-              Menü
+              MenÃ¼
             </summary>
             <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border border-zinc-900/15 bg-white/95 p-3 shadow-2xl shadow-zinc-900/10 backdrop-blur-md">
               {topMenus.map((menu) => (
