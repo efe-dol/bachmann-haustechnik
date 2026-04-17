@@ -122,6 +122,43 @@ export default function HeizungsprojektePage() {
             </div>
           </nav>
 
+          <details className="relative lg:hidden">
+            <summary className="list-none cursor-pointer rounded-lg border border-white/70 bg-white/75 px-3 py-2 text-xs font-semibold tracking-wide text-zinc-800 transition hover:border-blue-200 hover:text-blue-600 [&::-webkit-details-marker]:hidden">
+              Menü
+            </summary>
+            <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border border-zinc-900/15 bg-white/95 p-3 shadow-2xl shadow-zinc-900/10 backdrop-blur-md">
+              {topMenus.map((menu) => (
+                <div key={menu.title} className="border-b border-zinc-200 py-2 last:border-b-0">
+                  {menu.href ? (
+                    <Link
+                      href={menu.href}
+                      className="block rounded-md px-3 py-2 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-900/5"
+                    >
+                      {menu.title}
+                    </Link>
+                  ) : (
+                    <>
+                      <p className="px-3 py-1 text-xs font-semibold tracking-[0.12em] text-zinc-500 uppercase">
+                        {menu.title}
+                      </p>
+                      <div className="mt-1 grid gap-1">
+                        {(menu.links ?? []).map((item) => (
+                          <Link
+                            key={item.label}
+                            href={item.href}
+                            className="block rounded-md px-3 py-2 text-sm text-zinc-800 transition hover:bg-zinc-900/5"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </details>
+
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"
