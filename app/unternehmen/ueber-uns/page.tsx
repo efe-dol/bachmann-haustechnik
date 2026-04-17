@@ -124,7 +124,7 @@ export default function UnternehmenUeberUnsPage() {
                         {menu.title} <span className="ml-1 text-[10px] text-zinc-600">v</span>
                       </button>
                       <div className="pointer-events-none absolute left-1/2 top-[calc(100%-1px)] z-50 w-56 -translate-x-1/2 translate-y-1 rounded-lg border border-zinc-900/15 bg-white/92 p-2 opacity-0 shadow-2xl shadow-zinc-900/10 backdrop-blur-md transition-all duration-150 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
-                        {menu.links.map((item) => (
+                        {(menu.links ?? []).map((item) => (
                           <Link
                             key={item.label}
                             href={item.href}

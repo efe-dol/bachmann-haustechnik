@@ -278,7 +278,7 @@ export default function Page() {
                     <span className="pointer-events-none absolute top-2 right-0 h-5 w-px bg-zinc-900/20" />
                   )}
                   <div className="pointer-events-none absolute left-1/2 top-[calc(100%-1px)] z-50 w-56 -translate-x-1/2 translate-y-1 rounded-lg border border-zinc-900/15 bg-white/92 p-2 opacity-0 shadow-2xl shadow-zinc-900/10 backdrop-blur-md transition-all duration-150 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
-                    {menu.links.map((item) => (
+                    {(menu.links ?? []).map((item) => (
                       <a
                         key={item.label}
                         href={item.href}
