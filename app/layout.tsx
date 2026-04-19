@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ThemeModeToggle from "@/app/components/ThemeModeToggle";
 import PageTitleSync from "@/app/components/PageTitleSync";
+import CookieBanner from "@/app/components/CookieBanner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -47,6 +48,7 @@ export default async function RootLayout({
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         <PageTitleSync />
         <main className="flex-1">{children}</main>
+        <CookieBanner />
 
         <footer className="footer-reveal footer-delay-1 border-t border-zinc-200 bg-white px-6 py-10 text-zinc-700 md:px-10">
           <div className="footer-sheen mx-auto w-full max-w-7xl rounded-3xl border border-zinc-200 bg-white p-6 shadow-xl md:p-8">
