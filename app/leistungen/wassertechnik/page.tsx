@@ -1,7 +1,9 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
+import HeaderSearchActions from "@/app/components/HeaderSearchActions";
+
 import { useEffect, useState } from "react";
 
 const topMenus = [
@@ -85,13 +87,13 @@ export default function WassertechnikPage() {
           </Link>
 
           <nav className="hidden lg:flex">
-            <div className="inline-flex overflow-visible rounded-lg border border-zinc-900/20 bg-transparent shadow-[0_6px_20px_rgba(0,0,0,0.10)] backdrop-blur-sm">
+            <div className="header-menu-shell">
               {topMenus.map((menu, index) => (
                 <div key={menu.title} className="group relative">
                   {menu.href ? (
                     <Link
                       href={menu.href}
-                      className="inline-flex px-6 py-2.5 text-xs font-medium tracking-wide text-zinc-900 transition hover:bg-zinc-900/5"
+                      className="header-menu-trigger"
                     >
                       {menu.title}
                     </Link>
@@ -99,16 +101,16 @@ export default function WassertechnikPage() {
                     <>
                       <button
                         type="button"
-                        className="inline-flex cursor-pointer px-6 py-2.5 text-xs font-medium tracking-wide text-zinc-900 transition hover:bg-zinc-900/5"
+                        className="header-menu-trigger"
                       >
-                        {menu.title} <span className="ml-1 text-[10px] text-zinc-600">v</span>
+                        {menu.title} <span className="header-menu-trigger-chevron">v</span>
                       </button>
-                      <div className="pointer-events-none absolute left-1/2 top-[calc(100%-1px)] z-50 w-56 -translate-x-1/2 translate-y-1 rounded-lg border border-zinc-900/15 bg-white/92 p-2 opacity-0 shadow-2xl shadow-zinc-900/10 backdrop-blur-md transition-all duration-150 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+                      <div className="header-menu-dropdown">
                         {(menu.links ?? []).map((item) => (
                           <a
                             key={item.label}
                             href={item.href}
-                            className={`block rounded-md px-4 py-2.5 text-sm transition hover:bg-zinc-900/5 ${
+                            className={`header-menu-dropdown-link text-sm ${
                               item.label === "Wassertechnik"
                                 ? "bg-zinc-900/10 text-zinc-900"
                                 : "text-zinc-900"
@@ -121,7 +123,7 @@ export default function WassertechnikPage() {
                     </>
                   )}
                   {index < topMenus.length - 1 && (
-                    <span className="pointer-events-none absolute top-2 right-0 h-5 w-px bg-zinc-900/20" />
+                    <span className="header-menu-divider" />
                   )}
                 </div>
               ))}
@@ -129,16 +131,16 @@ export default function WassertechnikPage() {
           </nav>
 
           <details className="relative lg:hidden">
-            <summary className="list-none cursor-pointer rounded-lg border border-white/70 bg-white/75 px-3 py-2 text-xs font-semibold tracking-wide text-zinc-800 transition hover:border-blue-200 hover:text-blue-600 [&::-webkit-details-marker]:hidden">
+            <summary className="header-menu-summary">
               Menü
             </summary>
-            <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border border-zinc-900/15 bg-white/95 p-3 shadow-2xl shadow-zinc-900/10 backdrop-blur-md">
+            <div className="header-menu-panel">
               {topMenus.map((menu) => (
                 <div key={menu.title} className="border-b border-zinc-200 py-2 last:border-b-0">
                   {menu.href ? (
                     <Link
                       href={menu.href}
-                      className="block rounded-md px-3 py-2 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-900/5"
+                      className="header-menu-mobile-link font-semibold"
                     >
                       {menu.title}
                     </Link>
@@ -152,7 +154,7 @@ export default function WassertechnikPage() {
                           <Link
                             key={item.label}
                             href={item.href}
-                            className="block rounded-md px-3 py-2 text-sm text-zinc-800 transition hover:bg-zinc-900/5"
+                            className="header-menu-mobile-link"
                           >
                             {item.label}
                           </Link>
@@ -165,45 +167,7 @@ export default function WassertechnikPage() {
             </div>
           </details>
 
-          <div className="flex items-center justify-end gap-2">
-            <button
-              type="button"
-              aria-label="Suche"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/70 bg-white/75 text-zinc-700 transition hover:border-blue-200 hover:text-blue-600"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="E-Mail"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/70 bg-white/75 text-zinc-700 transition hover:border-blue-200 hover:text-blue-600"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="5" width="18" height="14" rx="2" />
-                <path d="m4 7 8 6 8-6" />
-              </svg>
-            </button>
-            <a
-              href="/login"
-              aria-label="Login"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/70 bg-white/75 text-zinc-700 transition hover:border-blue-200 hover:text-blue-600"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M10 17 15 12 10 7" />
-                <path d="M15 12H3" />
-                <path d="M21 4v16" />
-              </svg>
-            </a>
-            <a
-              href="/kontakt"
-              className="inline-flex h-9 items-center rounded-lg bg-zinc-900 px-4 text-xs font-semibold text-white transition hover:bg-zinc-700"
-            >
-              Angebot anfragen
-            </a>
-          </div>
+          <HeaderSearchActions />
         </div>
       </header>
 
@@ -237,3 +201,6 @@ export default function WassertechnikPage() {
     </main>
   );
 }
+
+
+

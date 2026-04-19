@@ -1,8 +1,11 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
+
 import { useEffect, useRef, useState } from "react";
+import HeaderSearchActions from "@/app/components/HeaderSearchActions";
+import SiteMessageBanner from "@/app/components/SiteMessageBanner";
 
 const topMenus = [
   {
@@ -86,6 +89,25 @@ const focusPoints = [
   },
 ];
 
+const processSteps = [
+  {
+    title: "Erstberatung",
+    description: "Wir klären Bedarf, Budget und technische Rahmenbedingungen bei Ihnen vor Ort.",
+  },
+  {
+    title: "Angebot & Förderung",
+    description: "Sie erhalten ein transparentes Angebot inklusive möglicher Förderoptionen.",
+  },
+  {
+    title: "Montage & Koordination",
+    description: "Termintreue Umsetzung mit sauberer Ausführung und klarer Abstimmung.",
+  },
+  {
+    title: "Abnahme & Service",
+    description: "Nach Abschluss bleiben wir mit Wartung und Support zuverlässig an Ihrer Seite.",
+  },
+];
+
 export default function Page() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLeistungenInView, setIsLeistungenInView] = useState(false);
@@ -115,45 +137,102 @@ export default function Page() {
 
   useEffect(() => {
     const introLogoWidth = 280;
+    let cancelled = false;
+    let trackingFly = false;
+    let flyRafId = 0;
+    let hideTimer = 0;
 
     const computeTargetTransform = () => {
-      if (!headerLogoRef.current) {
+      const logoRect = headerLogoRef.current?.getBoundingClientRect();
+
+      if (!logoRect) {
         return;
       }
 
-      const rect = headerLogoRef.current.getBoundingClientRect();
-      const targetCenterX = rect.left + rect.width / 2;
-      const targetCenterY = rect.top + rect.height / 2;
-      const viewportCenterX = window.innerWidth / 2;
-      const viewportCenterY = window.innerHeight / 2;
-      const dx = targetCenterX - viewportCenterX;
-      const dy = targetCenterY - viewportCenterY;
-      const scale = rect.width / introLogoWidth;
+      const targetCenterX = logoRect.left + logoRect.width / 2;
+      const targetCenterY = logoRect.top + logoRect.height / 2;
+      const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+      const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+      const viewportCenterX = viewportWidth / 2;
+      const viewportCenterY = viewportHeight / 2;
+      const dx = Math.round(targetCenterX - viewportCenterX);
+      const dy = Math.round(targetCenterY - viewportCenterY);
+      const scale = logoRect.width / introLogoWidth;
 
       setIntroTargetTransform(
         `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scale})`,
       );
     };
 
+    const waitForStableLayout = async () => {
+      if (typeof document !== "undefined" && "fonts" in document) {
+        try {
+          await (document as Document & { fonts: FontFaceSet }).fonts.ready;
+        } catch {
+          // Ignore font readiness errors and continue with best-effort layout.
+        }
+      }
+
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => resolve());
+        });
+      });
+    };
+
+    const startFlyPhase = async () => {
+      await waitForStableLayout();
+
+      if (cancelled) {
+        return;
+      }
+
+      computeTargetTransform();
+      setIntroPhase("fly");
+
+      trackingFly = true;
+      const trackFlyTarget = () => {
+        if (!trackingFly || cancelled) {
+          return;
+        }
+
+        computeTargetTransform();
+        flyRafId = window.requestAnimationFrame(trackFlyTarget);
+      };
+
+      flyRafId = window.requestAnimationFrame(trackFlyTarget);
+    };
+
     computeTargetTransform();
     window.addEventListener("resize", computeTargetTransform);
 
     const flyTimer = window.setTimeout(() => {
-      computeTargetTransform();
-      setIntroPhase("fly");
+      void startFlyPhase();
     }, 980);
 
     const doneTimer = window.setTimeout(() => {
       setIntroPhase("done");
-      window.setTimeout(() => {
+      hideTimer = window.setTimeout(() => {
+        trackingFly = false;
+        if (flyRafId) {
+          window.cancelAnimationFrame(flyRafId);
+        }
         setIntroVisible(false);
       }, 560);
     }, 2520);
 
     return () => {
+      cancelled = true;
+      trackingFly = false;
+      if (flyRafId) {
+        window.cancelAnimationFrame(flyRafId);
+      }
       window.removeEventListener("resize", computeTargetTransform);
       window.clearTimeout(flyTimer);
       window.clearTimeout(doneTimer);
+      if (hideTimer) {
+        window.clearTimeout(hideTimer);
+      }
     };
   }, []);
 
@@ -265,24 +344,24 @@ export default function Page() {
           </Link>
 
           <nav className="hidden lg:flex">
-            <div className="inline-flex overflow-visible rounded-lg border border-zinc-900/20 bg-transparent shadow-[0_6px_20px_rgba(0,0,0,0.10)] backdrop-blur-sm">
+            <div className="header-menu-shell">
               {topMenus.map((menu, index) => (
                 <div key={menu.title} className="group relative">
                   <button
                     type="button"
-                    className="inline-flex cursor-pointer px-6 py-2.5 text-xs font-medium tracking-wide text-zinc-900 transition hover:bg-zinc-900/5"
+                    className="header-menu-trigger"
                   >
-                    {menu.title} <span className="ml-1 text-[10px] text-zinc-600">v</span>
+                    {menu.title} <span className="header-menu-trigger-chevron">v</span>
                   </button>
                   {index < topMenus.length - 1 && (
-                    <span className="pointer-events-none absolute top-2 right-0 h-5 w-px bg-zinc-900/20" />
+                    <span className="header-menu-divider" />
                   )}
-                  <div className="pointer-events-none absolute left-1/2 top-[calc(100%-1px)] z-50 w-56 -translate-x-1/2 translate-y-1 rounded-lg border border-zinc-900/15 bg-white/92 p-2 opacity-0 shadow-2xl shadow-zinc-900/10 backdrop-blur-md transition-all duration-150 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+                  <div className="header-menu-dropdown">
                     {(menu.links ?? []).map((item) => (
                       <a
                         key={item.label}
                         href={item.href}
-                        className="block rounded-md px-4 py-2.5 text-sm text-zinc-900 transition hover:bg-zinc-900/5"
+                        className="header-menu-dropdown-link text-sm"
                       >
                         {item.label}
                       </a>
@@ -294,10 +373,10 @@ export default function Page() {
           </nav>
 
           <details className="relative lg:hidden">
-            <summary className="list-none cursor-pointer rounded-lg border border-white/70 bg-white/75 px-3 py-2 text-xs font-semibold tracking-wide text-zinc-800 transition hover:border-blue-200 hover:text-blue-600 [&::-webkit-details-marker]:hidden">
+            <summary className="header-menu-summary">
               Menü
             </summary>
-            <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border border-zinc-900/15 bg-white/95 p-3 shadow-2xl shadow-zinc-900/10 backdrop-blur-md">
+            <div className="header-menu-panel">
               {topMenus.map((menu) => (
                 <div key={menu.title} className="border-b border-zinc-200 py-2 last:border-b-0">
                   <p className="px-3 py-1 text-xs font-semibold tracking-[0.12em] text-zinc-500 uppercase">
@@ -308,7 +387,7 @@ export default function Page() {
                       <Link
                         key={item.label}
                         href={item.href}
-                        className="block rounded-md px-3 py-2 text-sm text-zinc-800 transition hover:bg-zinc-900/5"
+                        className="header-menu-mobile-link"
                       >
                         {item.label}
                       </Link>
@@ -319,53 +398,15 @@ export default function Page() {
             </div>
           </details>
 
-          <div className="flex items-center justify-end gap-2">
-            <button
-              type="button"
-              aria-label="Suche"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/70 bg-white/75 text-zinc-700 transition hover:border-blue-200 hover:text-blue-600"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="E-Mail"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/70 bg-white/75 text-zinc-700 transition hover:border-blue-200 hover:text-blue-600"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="5" width="18" height="14" rx="2" />
-                <path d="m4 7 8 6 8-6" />
-              </svg>
-            </button>
-            <a
-              href="/login"
-              aria-label="Login"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/70 bg-white/75 text-zinc-700 transition hover:border-blue-200 hover:text-blue-600"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M10 17 15 12 10 7" />
-                <path d="M15 12H3" />
-                <path d="M21 4v16" />
-              </svg>
-            </a>
-            <a
-              href="/kontakt"
-              className="inline-flex h-9 items-center rounded-lg bg-zinc-900 px-4 text-xs font-semibold text-white transition hover:bg-zinc-700"
-            >
-              Angebot anfragen
-            </a>
-          </div>
+          <HeaderSearchActions />
         </div>
       </header>
 
       <div
-        className={`transition-all duration-700 ${
+        className={`transition-opacity duration-500 ${
           introDone
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-2 opacity-0"
+            ? "opacity-100"
+            : "pointer-events-none opacity-0"
         }`}
       >
 
@@ -410,24 +451,29 @@ export default function Page() {
           <p className={`${introDone ? "anim-text-enter anim-delay-4" : "anim-prep"} text-xs font-semibold tracking-[0.18em] text-blue-700 uppercase`}>
             Ablaufübersicht
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div className={`${introDone ? "anim-soft-enter anim-delay-4" : "anim-prep"} rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-zinc-800`}>
-              Erstberatung und Bedarf
-            </div>
-            <div className={`${introDone ? "anim-soft-enter anim-delay-5" : "anim-prep"} rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700`}>
-              Angebot und Fördercheck
-            </div>
-            <div className={`${introDone ? "anim-soft-enter anim-delay-5" : "anim-prep"} rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700`}>
-              Montage und Koordination
-            </div>
-            <div className={`${introDone ? "anim-soft-enter anim-delay-6" : "anim-prep"} rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700`}>
-              Wartung und Service
-            </div>
+          <div className="relative mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="pointer-events-none absolute top-8 right-[6%] left-[6%] hidden h-px bg-gradient-to-r from-blue-200 via-sky-300 to-cyan-300 md:block" />
+            {processSteps.map((step, index) => (
+              <article
+                key={step.title}
+                className={`${introDone ? "anim-soft-enter" : "anim-prep"} ${index === 0 ? "anim-delay-4" : ""} ${index === 1 ? "anim-delay-5" : ""} ${index === 2 ? "anim-delay-5" : ""} ${index === 3 ? "anim-delay-6" : ""} relative rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md`}
+              >
+                <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-xs font-black text-blue-700">
+                  {index + 1}
+                </div>
+                <h3 className="text-sm font-black tracking-tight text-zinc-900">{step.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-zinc-700">{step.description}</p>
+              </article>
+            ))}
           </div>
           <p className="mt-4 text-xs text-zinc-500">
             Klare Schritte von Anfrage bis laufendem Service.
           </p>
         </div>
+      </section>
+
+      <section className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-8 md:px-10">
+        <SiteMessageBanner className={`${introDone ? "anim-soft-enter anim-delay-6" : "anim-prep"} w-full`} />
       </section>
 
       <section
@@ -570,3 +616,6 @@ export default function Page() {
     </main>
   );
 }
+
+
+

@@ -4,13 +4,44 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 This project now includes a Tailwind CSS login form connected to Supabase Auth.
 
+## Admin Panel and Token-Based Registration
+
+The project now includes:
+
+- Token-based registration at `/login` (registration is only possible with an admin-issued token)
+- Internal roles: `administrator` and `intern`
+- Admin dashboard at `/admin` with:
+	- Registered user count
+	- Maintenance mode toggle (administrator only)
+	- Announcement management (administrator and intern)
+	- Database and website stability status
+	- User management (intern: read-only, administrator: role changes)
+
+### Required environment variables
+
+Add these to `.env.local` and deployment environment variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+### Database setup
+
+Run the SQL file in Supabase SQL Editor before using registration/admin features:
+
+- `supabase/admin_schema.sql`
+
+The SQL enables secure token handling (hashed tokens), profile roles, announcements, site settings, and RLS policies.
+
 ### 1) Configure environment variables
 
 Copy `.env.local.example` to `.env.local` and fill in your Supabase project values:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 ```
 
 ### 2) Enable email/password auth in Supabase
