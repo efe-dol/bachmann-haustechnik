@@ -1,17 +1,166 @@
-﻿export default function DatenschutzPage() {
+﻿"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+
+import { useEffect, useState } from "react";
+import HeaderSearchActions from "@/app/components/HeaderSearchActions";
+
+const topMenus = [
+  {
+    title: "Startseite",
+    href: "/",
+  },
+  {
+    title: "Leistungen",
+    links: [
+      { label: "Bäder", href: "/leistungen/baeder" },
+      { label: "Heizungen", href: "/leistungen/heizungen" },
+      { label: "Sanitär", href: "/leistungen/sanitaer" },
+      { label: "Wassertechnik", href: "/leistungen/wassertechnik" },
+    ],
+  },
+  {
+    title: "Referenzen",
+    links: [
+      { label: "Badmodernisierung", href: "/referenzen/badumbau" },
+      { label: "Heizungsprojekte", href: "/referenzen/heizungsprojekte" },
+      { label: "Wassertechnik", href: "/referenzen/wassertechnik" },
+    ],
+  },
+  {
+    title: "Unternehmen",
+    links: [
+      { label: "Über uns", href: "/unternehmen/ueber-uns" },
+      { label: "Partner", href: "/unternehmen/partner" },
+      { label: "Kontakt", href: "/kontakt" },
+    ],
+  },
+];
+
+export default function DatenschutzPage() {
   const updatedAt = "19.04.2026";
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 16);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 px-6 py-16 text-zinc-900 md:px-10">
-      <div className="mx-auto w-full max-w-4xl rounded-3xl border border-white/70 bg-white/85 p-8 shadow-2xl backdrop-blur-md md:p-10">
-        <p className="text-xs font-semibold tracking-[0.2em] text-blue-700 uppercase">
-          Rechtliches
-        </p>
-        <h1 className="mt-3 text-4xl font-black tracking-tight text-zinc-900 md:text-5xl">
-          Datenschutzerklärung
-        </h1>
+    <main className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 px-6 pt-0 pb-12 text-zinc-900 md:px-10">
+      <header
+        className={`fixed top-0 right-0 left-0 z-40 transition-all duration-300 ${
+          isScrolled
+            ? "border-b border-white/70 bg-white/70 backdrop-blur-lg"
+            : "border-b border-transparent bg-transparent backdrop-blur-0"
+        }`}
+      >
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-4 px-6 py-3 md:px-10 lg:grid-cols-[1fr_auto_1fr]">
+          <Link href="/" className="inline-flex items-center">
+            <Image
+              src="/bachmann-logo.png"
+              alt="Bachmann Haustechnik"
+              width={200}
+              height={76}
+              priority
+              className="h-auto w-[120px] md:w-[160px]"
+            />
+          </Link>
 
-        <div className="mt-8 space-y-8 text-sm leading-relaxed text-zinc-700">
+          <nav className="hidden lg:flex">
+            <div className="header-menu-shell">
+              {topMenus.map((menu, index) => (
+                <div key={menu.title} className="group relative">
+                  {menu.href ? (
+                    <Link
+                      href={menu.href}
+                      className="header-menu-trigger"
+                    >
+                      {menu.title}
+                    </Link>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="header-menu-trigger"
+                      >
+                        {menu.title} <span className="header-menu-trigger-chevron">v</span>
+                      </button>
+                      <div className="header-menu-dropdown">
+                        {(menu.links ?? []).map((item) => (
+                          <Link
+                            key={item.label}
+                            href={item.href}
+                            className="header-menu-dropdown-link text-sm"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {index < topMenus.length - 1 && (
+                    <span className="header-menu-divider" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </nav>
+
+          <details className="relative lg:hidden">
+            <summary className="header-menu-summary">
+              Menü
+            </summary>
+            <div className="header-menu-panel">
+              {topMenus.map((menu) => (
+                <div key={menu.title} className="border-b border-zinc-200 py-2 last:border-b-0">
+                  {menu.href ? (
+                    <Link
+                      href={menu.href}
+                      className="header-menu-mobile-link font-semibold"
+                    >
+                      {menu.title}
+                    </Link>
+                  ) : (
+                    <>
+                      <p className="px-3 py-1 text-xs font-semibold tracking-[0.12em] text-zinc-500 uppercase">
+                        {menu.title}
+                      </p>
+                      <div className="mt-1 grid gap-1">
+                        {(menu.links ?? []).map((item) => (
+                          <Link
+                            key={item.label}
+                            href={item.href}
+                            className="header-menu-mobile-link"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </details>
+
+          <HeaderSearchActions />
+        </div>
+      </header>
+
+      <div className="mx-auto w-full max-w-4xl pt-40">
+        <section className="rounded-3xl border border-white/70 bg-white/85 p-8 shadow-2xl backdrop-blur-md md:p-10">
+          <p className="text-xs font-semibold tracking-[0.2em] text-blue-700 uppercase">
+            Rechtliches
+          </p>
+          <h1 className="mt-3 text-4xl font-black tracking-tight text-zinc-900 md:text-5xl">
+            Datenschutzerklärung
+          </h1>
+
+          <div className="mt-8 space-y-8 text-sm leading-relaxed text-zinc-700">
           <section>
             <h2 className="text-base font-black text-zinc-900">1. Verantwortlicher</h2>
             <p className="mt-2">
@@ -43,12 +192,19 @@
           <section>
             <h2 className="text-base font-black text-zinc-900">3. Hosting und Server-Logfiles</h2>
             <p className="mt-2">
+              Diese Website wird über die Hosting- und Infrastrukturplattform Vercel Inc. bereitgestellt.
+            </p>
+            <p className="mt-2">
               Beim Aufruf dieser Website werden technisch notwendige Verbindungsdaten verarbeitet (z. B. IP-Adresse,
               Datum/Uhrzeit, aufgerufene URL, Browser/Version, Betriebssystem, Referrer). Die Verarbeitung erfolgt zur
               sicheren Bereitstellung der Website, zur Fehleranalyse sowie zur Abwehr von Missbrauch.
             </p>
             <p className="mt-2">
               Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an sicherem und stabilem Betrieb der Website).
+            </p>
+            <p className="mt-2">
+              Soweit hierbei eine Verarbeitung in Drittländern (insbesondere den USA) stattfindet, erfolgt diese auf
+              Grundlage geeigneter Garantien gemäß Art. 44 ff. DSGVO (z. B. Standardvertragsklauseln), soweit erforderlich.
             </p>
           </section>
 
@@ -122,7 +278,7 @@
             <h2 className="text-base font-black text-zinc-900">9. Empfänger von Daten</h2>
             <p className="mt-2">
               Daten können an technische Dienstleister übermittelt werden, die wir zur Bereitstellung der Website und
-              unserer Funktionen einsetzen (z. B. Hosting, Formspree, Supabase). Diese Dienstleister werden als
+              unserer Funktionen einsetzen (z. B. Vercel als Hosting-Anbieter, Formspree, Supabase). Diese Dienstleister werden als
               Auftragsverarbeiter gemäß Art. 28 DSGVO eingebunden, soweit erforderlich.
             </p>
           </section>
@@ -156,7 +312,8 @@
               technischen oder organisatorischen Änderungen anzupassen.
             </p>
           </section>
-        </div>
+          </div>
+        </section>
       </div>
     </main>
   );
