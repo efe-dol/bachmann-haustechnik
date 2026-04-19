@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 type Announcement = {
   id: string;
@@ -42,6 +43,7 @@ export default async function WartungPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 px-6 py-16 text-zinc-900 md:px-10">
+      <style>{`footer { display: none !important; }`}</style>
       <div className="maintenance-bg-grid pointer-events-none absolute inset-0" aria-hidden="true" />
 
       <div className="mx-auto flex min-h-[70vh] w-full max-w-3xl items-center justify-center">
@@ -83,6 +85,16 @@ export default async function WartungPage() {
             <div className="maintenance-progress-track mt-3">
               <span className="maintenance-progress-fill" />
             </div>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs font-semibold text-zinc-600">
+            <Link href="/impressum" className="transition hover:text-blue-700">
+              Impressum
+            </Link>
+            <span className="h-1 w-1 rounded-full bg-zinc-300" />
+            <Link href="/datenschutz" className="transition hover:text-blue-700">
+              Datenschutzerklärung
+            </Link>
           </div>
         </section>
       </div>

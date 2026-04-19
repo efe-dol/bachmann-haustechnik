@@ -45,6 +45,8 @@ export async function middleware(request: NextRequest) {
   const isAllowedDuringMaintenance =
     pathname === "/login" ||
     pathname === "/wartung" ||
+    pathname === "/impressum" ||
+    pathname === "/datenschutz" ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/api/admin") ||
     pathname.startsWith("/api/auth");
